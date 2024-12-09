@@ -15,6 +15,8 @@ We now transform local space vertices to clip space using uniform matrices in th
 #include <filesystem>
 #include <math.h>
 
+#define GLM_ENABLE_EXPERIMENTAL
+
 #include "AssimpImport.h"
 #include "Mesh3D.h"
 #include "Object3D.h"
@@ -22,6 +24,9 @@ We now transform local space vertices to clip space using uniform matrices in th
 #include "ShaderProgram.h"
 #include <SFML/Window/Event.hpp>
 #include <SFML/Window/Window.hpp>
+#include <glm/gtx/string_cast.hpp>
+
+#include <fstream>
 
 struct Scene {
 	ShaderProgram program;
@@ -57,6 +62,12 @@ ShaderProgram texturingShader() {
 		std::cout << "ERROR: " << e.what() << std::endl;
 		exit(1);
 	}
+	return shader;
+
+}
+ShaderProgram createUniformColorShader() {
+	ShaderProgram shader;
+	shader.load("shaders/uniform_color.vert", "shaders/uniform_color.frag");
 	return shader;
 }
 
@@ -122,7 +133,7 @@ Scene marbleSquare() {
  * @brief Loads a cube with a cube map texture.
  */
 Scene cube() {
-	Scene scene{ texturingShader() };
+	Scene scene{ createUniformColorShader() };//texturingShader()
 
 	auto cube = assimpLoad("models/cube.obj", true);
 
@@ -134,6 +145,9 @@ Scene cube() {
 	spinCube.addAnimation(std::make_unique<RotationAnimation>(scene.objects[0], 10.0, glm::vec3(2 * M_PI, 0, 0)));
 
 	scene.animators.push_back(std::move(spinCube));
+
+	scene.program.activate();
+	scene.program.setUniform("color", glm::vec3(1.0f, 0.0f, 0.0f));
 
 	return scene;
 }
@@ -175,12 +189,68 @@ Scene lifeOfPi() {
 	return scene;
 }
 
+Scene bowlingBall() {
+	Scene scene{ texturingShader() }; // Use the texturing shader for rendering.createUniformColorShader()
 
+	auto ball = assimpLoad("models/bowlingset/bs.obj", true);//models/bowlingdevil/BOWLING BALL.obj models/bowlingpin/Bowling_Pin.obj"
+
+	ball.move(glm::vec3(0, -0.7, 0));
+	ball.grow(glm::vec3(0.01f,0.01f, 0.01f));
+	 
+
+	auto boat = assimpLoad("models/boat/boat.fbx", true);
+	boat.move(glm::vec3(0, -0.7, 0));
+	boat.grow(glm::vec3(0.01, 0.01, 0.01));
+
+	scene.objects.push_back(std::move(ball));
+	scene.objects.push_back(std::move(boat));
+	
+	/*myScene.program.setUniform("color", glm::vec3(1.0f, 0.0f, 0.0f));*/
+	Animator ballAnimator;
+
+	ballAnimator.addAnimation(std::make_unique<RotationAnimation>(scene.objects[0], 10, glm::vec3(0, 0.5 * M_PI, 0)));
+
+	scene.animators.push_back(std::move(ballAnimator));
+
+	return scene;
+}
+glm::vec3 calculateBoundingBox(const std::string& objFilePath) {
+	std::ifstream file(objFilePath);
+	if (!file.is_open()) {
+		throw std::runtime_error("Failed to open OBJ file: " + objFilePath);
+	}
+
+	glm::vec3 minPoint(std::numeric_limits<float>::max());
+	glm::vec3 maxPoint(std::numeric_limits<float>::lowest());
+
+	std::string line;
+	while (std::getline(file, line)) {
+		std::istringstream iss(line);
+		std::string prefix;
+		iss >> prefix;
+
+		// Parse vertex positions
+		if (prefix == "v") {
+			float x, y, z;
+			iss >> x >> y >> z;
+			minPoint = glm::min(minPoint, glm::vec3(x, y, z));
+			maxPoint = glm::max(maxPoint, glm::vec3(x, y, z));
+		}
+	}
+
+	file.close();
+	return maxPoint - minPoint; // Return the size of the bounding box
+}
 
 int main() {
 	
 	std::cout << std::filesystem::current_path() << std::endl;
-	
+
+	glm::vec3 boundingBoxSize = calculateBoundingBox("models/cottage/cottage_obj.obj");//"models/bowlingdevil/BOWLING BALL.obj" models/bowlingpin/Bowling_Pin.obj
+	std::cout << "Bounding box size (width, height, depth): "
+		<< boundingBoxSize.x << ", "
+		<< boundingBoxSize.y << ", "
+		<< boundingBoxSize.z << std::endl;
 	// Initialize the window and OpenGL.
 	sf::ContextSettings settings;
 	settings.depthBits = 24; // Request a 24 bits depth buffer
@@ -194,7 +264,7 @@ int main() {
 	glEnable(GL_DEPTH_TEST);
 
 	// Inintialize scene objects.
-	auto myScene = lifeOfPi();
+	auto myScene = bowlingBall();// cube();// lifeOfPi();
 	// You can directly access specific objects in the scene using references.
 	auto& firstObject = myScene.objects[0];
 
