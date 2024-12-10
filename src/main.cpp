@@ -145,7 +145,7 @@ Scene cube() {
  */
 Scene lifeOfPi() {
 	// This scene is more complicated; it has child objects, as well as animators.
-	Scene scene{ texturingShader() };
+	Scene scene{ phongLightingShader() }; //texturingShader()
 
 	auto boat = assimpLoad("models/boat/boat.fbx", true);
 	boat.move(glm::vec3(0, -0.7, 0));
@@ -171,6 +171,12 @@ Scene lifeOfPi() {
 	scene.animators.push_back(std::move(animBoat));
 	scene.animators.push_back(std::move(animTiger));
 
+	//scene.program.setUniform("directionalLight", glm::vec3(2.0f, 2.0f, 2.0f));
+	//scene.program.setUniform("directionalColor", glm::vec3(0.5f, 0.5f, 1.0f));
+	//scene.program.setUniform("ambientColor", glm::vec3(0.5f, 0.5f, 0.5f));
+
+	//scene.program.setUniform("material", glm::vec4(0.5f, 0.5f, 0.5f, 30.0f));
+
 	// Transfer ownership of the objects and animators back to the main.
 	return scene;
 }
@@ -195,6 +201,9 @@ int main() {
 
 	// Inintialize scene objects.
 	auto myScene = lifeOfPi();
+
+	
+
 	// You can directly access specific objects in the scene using references.
 	auto& firstObject = myScene.objects[0];
 
@@ -202,7 +211,10 @@ int main() {
 	myScene.program.activate();
 
 	// Set up the view and projection matrices.
-	
+	myScene.program.setUniform("directionalLight", glm::vec3(2.0f, 2.0f, 2.0f));
+	myScene.program.setUniform("directionalColor", glm::vec3(0.5f, 0.5f, 1.0f));
+	myScene.program.setUniform("ambientColor", glm::vec3(0.5f, 0.5f, 0.5f));
+	myScene.program.setUniform("material", glm::vec4(0.5f, 0.5f, 0.5f, 30.0f));
 	// Ready, set, go!
 	bool running = true;
 	sf::Clock c;
