@@ -15,8 +15,6 @@ We now transform local space vertices to clip space using uniform matrices in th
 #include <filesystem>
 #include <math.h>
 
-#define GLM_ENABLE_EXPERIMENTAL
-
 #include "AssimpImport.h"
 #include "Mesh3D.h"
 #include "Object3D.h"
@@ -24,9 +22,6 @@ We now transform local space vertices to clip space using uniform matrices in th
 #include "ShaderProgram.h"
 #include <SFML/Window/Event.hpp>
 #include <SFML/Window/Window.hpp>
-#include <glm/gtx/string_cast.hpp>
-
-#include <fstream>
 
 #include <SFML/Audio.hpp>
 #include <thread>
@@ -65,12 +60,6 @@ ShaderProgram texturingShader() {
 		std::cout << "ERROR: " << e.what() << std::endl;
 		exit(1);
 	}
-	return shader;
-
-}
-ShaderProgram createUniformColorShader() {
-	ShaderProgram shader;
-	shader.load("shaders/uniform_color.vert", "shaders/uniform_color.frag");
 	return shader;
 }
 
@@ -162,7 +151,7 @@ Scene marbleSquare() {
  * @brief Loads a cube with a cube map texture.
  */
 Scene cube() {
-	Scene scene{ createUniformColorShader() };//texturingShader()
+	Scene scene{ texturingShader() };
 
 	auto cube = assimpLoad("models/cube.obj", true);
 
@@ -174,9 +163,6 @@ Scene cube() {
 	spinCube.addAnimation(std::make_unique<RotationAnimation>(scene.objects[0], 10.0, glm::vec3(2 * M_PI, 0, 0)));
 
 	scene.animators.push_back(std::move(spinCube));
-
-	scene.program.activate();
-	scene.program.setUniform("color", glm::vec3(1.0f, 0.0f, 0.0f));
 
 	return scene;
 }
@@ -218,6 +204,7 @@ Scene lifeOfPi() {
 	return scene;
 }
 
+<<<<<<< HEAD
 Scene bowlingBall() {
 	Scene scene{ phongLightingShader() }; //createUniformColorShader ()
 
@@ -272,16 +259,23 @@ void playSoundAsync(const std::string& filePath) {
 		delete buffer;
 		}).detach(); 
 }
+=======
+
+>>>>>>> parent of fc16689 (Commit 1 Working on rendering objects in scene)
 
 int main() {
 	
 	std::cout << std::filesystem::current_path() << std::endl;
+<<<<<<< HEAD
 
 	glm::vec3 boundingBoxSize = calculateBoundingBox("models/bowlingpin/Pin.obj");///"models/bowlingdevil/BOWLING BALL.obj" models/bowlingpin/Bowling_Pin.obj
 	std::cout << "Bounding box size (width, height, depth): "
 		<< boundingBoxSize.x << ", "
 		<< boundingBoxSize.y << ", "
 		<< boundingBoxSize.z << std::endl;
+=======
+	
+>>>>>>> parent of fc16689 (Commit 1 Working on rendering objects in scene)
 	// Initialize the window and OpenGL.
 	sf::ContextSettings settings;
 	settings.depthBits = 24; // Request a 24 bits depth buffer
@@ -295,7 +289,11 @@ int main() {
 	glEnable(GL_DEPTH_TEST);
 
 	// Inintialize scene objects.
+<<<<<<< HEAD
 	auto myScene = lifeOfPi(); ; // ;// cube();// lifeOfPi();bowlingBall()
+=======
+	auto myScene = lifeOfPi();
+>>>>>>> parent of fc16689 (Commit 1 Working on rendering objects in scene)
 	// You can directly access specific objects in the scene using references.
 	auto& firstObject = myScene.objects[0];
 
