@@ -222,10 +222,10 @@ Scene bowlingBall() {
 	Scene scene{ phongLightingShader() }; //createUniformColorShader ()
 
 	auto alley = assimpLoad("models/bowlingalley/alley.obj", true);//models/bowlingdevil/devilbowlingball.obj models/Tree/tree01.obj models/bowlingpin/Pin.obj
-	auto devilbowlingball = assimpLoad("models/bowlingalley/alley.obj", true)
+	auto devilbowlingball = assimpLoad("models/bowlingdevil/devilbowlingball.obj", true);
 
-	ball.move(glm::vec3(0, -0.5, 0));
-	ball.grow(glm::vec3(0.2f,0.2f, 0.2f));
+	devilbowlingball.move(glm::vec3(0, -0.5, 0));
+	devilbowlingball.grow(glm::vec3(0.2f,0.2f, 0.2f));
 	 
 
 	auto boat = assimpLoad("models/boat/boat.fbx", true);
@@ -237,7 +237,7 @@ Scene bowlingBall() {
 	skybox.move(glm::vec3(0, 0, -40));
 	skybox.grow(glm::vec3(20, 20, 20));
 	skybox.rotate(glm::vec3(glm::radians(90.0f), glm::radians(-90.0f),0 ));
-	scene.objects.push_back(std::move(ball));
+	scene.objects.push_back(std::move(devilbowlingball));
 	scene.objects.push_back(std::move(boat));
 	scene.objects.push_back(std::move(skybox));
 
