@@ -18,7 +18,7 @@ add_executable (Graphics "src/main.cpp"  "include/AssimpImport.h" "include/Mesh3
 # Find and link external libraries, like SFML.
 # This only works if Vcpkg has been configured correctly.
 find_package(SFML COMPONENTS system window graphics CONFIG REQUIRED)
-target_link_libraries(Graphics PRIVATE sfml-system sfml-network sfml-graphics sfml-window)
+target_link_libraries(Graphics PRIVATE sfml-system sfml-network sfml-graphics sfml-window sfml-audio sfml-system)
 
 find_package(assimp CONFIG REQUIRED)
 target_link_libraries(Graphics PRIVATE assimp::assimp)

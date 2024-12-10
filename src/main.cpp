@@ -28,6 +28,9 @@ We now transform local space vertices to clip space using uniform matrices in th
 
 #include <fstream>
 
+#include <SFML/Audio.hpp>
+#include <thread>
+
 struct Scene {
 	ShaderProgram program;
 	std::vector<Object3D> objects;
@@ -79,6 +82,32 @@ Texture loadTexture(const std::filesystem::path& path, const std::string& sample
 	i.loadFromFile(path.string());
 	return Texture::loadImage(i, samplerName);
 }
+glm::vec3 calculateBoundingBox(const std::string& objFilePath) {
+	std::ifstream file(objFilePath);
+	if (!file.is_open()) {
+		throw std::runtime_error("Failed to open OBJ file: " + objFilePath);
+	}
+
+	glm::vec3 minPoint(std::numeric_limits<float>::max());
+	glm::vec3 maxPoint(std::numeric_limits<float>::lowest());
+
+	std::string line;
+	while (std::getline(file, line)) {
+		std::istringstream iss(line);
+		std::string prefix;
+		iss >> prefix;
+
+		if (prefix == "v") {
+			float x, y, z;
+			iss >> x >> y >> z;
+			minPoint = glm::min(minPoint, glm::vec3(x, y, z));
+			maxPoint = glm::max(maxPoint, glm::vec3(x, y, z));
+		}
+	}
+
+	file.close();
+	return maxPoint - minPoint; 
+}
 
 /*****************************************************************************************
 *  DEMONSTRATION SCENES
@@ -114,7 +143,7 @@ Scene bunny() {
  * that does not come from Assimp.
  */
 Scene marbleSquare() {
-	Scene scene{ texturingShader() };
+	Scene scene{ phongLightingShader() };// texturingShader()
 
 	std::vector<Texture> textures = {
 		loadTexture("models/White_marble_03/Textures_2K/white_marble_03_2k_baseColor.tga", "baseTexture"),
@@ -159,7 +188,7 @@ Scene cube() {
  */
 Scene lifeOfPi() {
 	// This scene is more complicated; it has child objects, as well as animators.
-	Scene scene{ texturingShader() };
+	Scene scene{ phongLightingShader() };
 
 	auto boat = assimpLoad("models/boat/boat.fbx", true);
 	boat.move(glm::vec3(0, -0.7, 0));
@@ -190,22 +219,28 @@ Scene lifeOfPi() {
 }
 
 Scene bowlingBall() {
-	Scene scene{ texturingShader() }; // Use the texturing shader for rendering.createUniformColorShader()
+	Scene scene{ phongLightingShader() }; //createUniformColorShader ()
 
-	auto ball = assimpLoad("models/bowlingset/bs.obj", true);//models/bowlingdevil/BOWLING BALL.obj models/bowlingpin/Bowling_Pin.obj"
+	auto alley = assimpLoad("models/bowlingalley/alley.obj", true);//models/bowlingdevil/devilbowlingball.obj models/Tree/tree01.obj models/bowlingpin/Pin.obj
+	auto devilbowlingball = assimpLoad("models/bowlingalley/alley.obj", true)
 
-	ball.move(glm::vec3(0, -0.7, 0));
-	ball.grow(glm::vec3(0.01f,0.01f, 0.01f));
+	ball.move(glm::vec3(0, -0.5, 0));
+	ball.grow(glm::vec3(0.2f,0.2f, 0.2f));
 	 
 
 	auto boat = assimpLoad("models/boat/boat.fbx", true);
 	boat.move(glm::vec3(0, -0.7, 0));
 	boat.grow(glm::vec3(0.01, 0.01, 0.01));
 
+	auto skybox = assimpLoad("models/Skybox/hellskybox.obj", true);//models/bowlingdevil/devilbowlingball.obj models/Tree/tree01.obj models/bowlingpin/Pin.obj
+
+	skybox.move(glm::vec3(0, 0, -40));
+	skybox.grow(glm::vec3(20, 20, 20));
+	skybox.rotate(glm::vec3(glm::radians(90.0f), glm::radians(-90.0f),0 ));
 	scene.objects.push_back(std::move(ball));
 	scene.objects.push_back(std::move(boat));
-	
-	/*myScene.program.setUniform("color", glm::vec3(1.0f, 0.0f, 0.0f));*/
+	scene.objects.push_back(std::move(skybox));
+
 	Animator ballAnimator;
 
 	ballAnimator.addAnimation(std::make_unique<RotationAnimation>(scene.objects[0], 10, glm::vec3(0, 0.5 * M_PI, 0)));
@@ -214,39 +249,31 @@ Scene bowlingBall() {
 
 	return scene;
 }
-glm::vec3 calculateBoundingBox(const std::string& objFilePath) {
-	std::ifstream file(objFilePath);
-	if (!file.is_open()) {
-		throw std::runtime_error("Failed to open OBJ file: " + objFilePath);
+void playSoundAsync(const std::string& filePath) {
+	auto* buffer = new sf::SoundBuffer();
+	if (!buffer->loadFromFile(filePath)) {
+		delete buffer;      
+		return;
 	}
 
-	glm::vec3 minPoint(std::numeric_limits<float>::max());
-	glm::vec3 maxPoint(std::numeric_limits<float>::lowest());
+	auto* sound = new sf::Sound();
+	sound->setBuffer(*buffer);
+	sound->play();
 
-	std::string line;
-	while (std::getline(file, line)) {
-		std::istringstream iss(line);
-		std::string prefix;
-		iss >> prefix;
-
-		// Parse vertex positions
-		if (prefix == "v") {
-			float x, y, z;
-			iss >> x >> y >> z;
-			minPoint = glm::min(minPoint, glm::vec3(x, y, z));
-			maxPoint = glm::max(maxPoint, glm::vec3(x, y, z));
+	std::thread([sound, buffer]() {
+		while (sound->getStatus() == sf::Sound::Playing) {
+			sf::sleep(sf::milliseconds(100)); 
 		}
-	}
-
-	file.close();
-	return maxPoint - minPoint; // Return the size of the bounding box
+		delete sound;
+		delete buffer;
+		}).detach(); 
 }
 
 int main() {
 	
 	std::cout << std::filesystem::current_path() << std::endl;
 
-	glm::vec3 boundingBoxSize = calculateBoundingBox("models/cottage/cottage_obj.obj");//"models/bowlingdevil/BOWLING BALL.obj" models/bowlingpin/Bowling_Pin.obj
+	glm::vec3 boundingBoxSize = calculateBoundingBox("models/bowlingpin/Pin.obj");///"models/bowlingdevil/BOWLING BALL.obj" models/bowlingpin/Bowling_Pin.obj
 	std::cout << "Bounding box size (width, height, depth): "
 		<< boundingBoxSize.x << ", "
 		<< boundingBoxSize.y << ", "
@@ -264,7 +291,7 @@ int main() {
 	glEnable(GL_DEPTH_TEST);
 
 	// Inintialize scene objects.
-	auto myScene = bowlingBall();// cube();// lifeOfPi();
+	auto myScene = bowlingBall(); ; // ;// cube();// lifeOfPi();
 	// You can directly access specific objects in the scene using references.
 	auto& firstObject = myScene.objects[0];
 
@@ -272,7 +299,18 @@ int main() {
 	myScene.program.activate();
 
 	// Set up the view and projection matrices.
-	
+
+	myScene.program.setUniform("directionalLight", glm::vec3(2.0f, 2.0f, 2.0f));
+	myScene.program.setUniform("directionalColor", glm::vec3(0.5f, 0.5f, 1.0f));
+	myScene.program.setUniform("ambientColor", glm::vec3(1.0f, 1.0f, 1.0f));
+	myScene.program.setUniform("material", glm::vec4(0.8f, 0.7f, 0.8f, 30.0f));
+
+	/*playSoundAsync("C:/Users/ViniciusDugue/CECS 449/proj/sounds/wiistrike.wav");
+
+	playSoundAsync("C:/Users/ViniciusDugue/CECS 449/proj/sounds/bowserlaugh.wav");
+
+	playSoundAsync("C:/Users/ViniciusDugue/CECS 449/proj/sounds/doomost.wav");*/
+
 	// Ready, set, go!
 	bool running = true;
 	sf::Clock c;
@@ -289,6 +327,12 @@ int main() {
 		while (window.pollEvent(ev)) {
 			if (ev.type == sf::Event::Closed) {
 				running = false;
+			}
+
+			if (ev.type == sf::Event::KeyPressed) {
+				if (ev.key.code == sf::Keyboard::Space) {
+					playSoundAsync("C:/Users/ViniciusDugue/CECS 449/proj/sounds/bowserlaugh.wav");
+				}
 			}
 		}
 		auto now = c.getElapsedTime();

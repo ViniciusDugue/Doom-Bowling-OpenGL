@@ -33,9 +33,9 @@ void main() {
     // TODO: using the lecture notes, compute ambientIntensity, diffuseIntensity, 
     // and specularIntensity.
 
-    vec3 N = normalize(Normal);                     // Normal vector
-    vec3 L = normalize(directionalLight);           // Light direction
-    vec3 V = normalize(viewPos - FragWorldPos);     // View direction
+    vec3 N = normalize(Normal);
+    vec3 L = normalize(directionalLight);
+    vec3 V = normalize(viewPos - FragWorldPos);
     vec3 R = reflect(-L, N);
 
     vec3 ambientIntensity = material.x * ambientColor;
