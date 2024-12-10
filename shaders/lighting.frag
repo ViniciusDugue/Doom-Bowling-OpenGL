@@ -33,7 +33,6 @@ void main() {
     // TODO: using the lecture notes, compute ambientIntensity, diffuseIntensity, 
     // and specularIntensity.
 
-<<<<<<< HEAD
     vec3 N = normalize(Normal);
     vec3 L = normalize(directionalLight);
     vec3 V = normalize(viewPos - FragWorldPos);
@@ -46,11 +45,6 @@ void main() {
 
     float spec = pow(max(dot(V, R), 0.0), material.w); 
     vec3 specularIntensity = material.z * directionalColor * spec;
-=======
-    vec3 ambientIntensity = vec3(0);
-    vec3 diffuseIntensity = vec3(0);
-    vec3 specularIntensity = vec3(0);
->>>>>>> parent of fc16689 (Commit 1 Working on rendering objects in scene)
 
     vec3 lightIntensity = ambientIntensity + diffuseIntensity + specularIntensity;
     FragColor = vec4(lightIntensity, 1) * texture(baseTexture, TexCoord);

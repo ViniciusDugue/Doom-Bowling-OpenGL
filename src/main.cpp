@@ -26,6 +26,10 @@ We now transform local space vertices to clip space using uniform matrices in th
 #include <SFML/Audio.hpp>
 #include <thread>
 
+#define GLM_ENABLE_EXPERIMENTAL
+#include <fstream>
+#include <glm/gtx/string_cast.hpp>
+
 struct Scene {
 	ShaderProgram program;
 	std::vector<Object3D> objects;
@@ -60,6 +64,12 @@ ShaderProgram texturingShader() {
 		std::cout << "ERROR: " << e.what() << std::endl;
 		exit(1);
 	}
+	return shader;
+}
+
+ShaderProgram createUniformColorShader() {
+	ShaderProgram shader;
+	shader.load("shaders/uniform_color.vert", "shaders/uniform_color.frag");
 	return shader;
 }
 
@@ -204,7 +214,6 @@ Scene lifeOfPi() {
 	return scene;
 }
 
-<<<<<<< HEAD
 Scene bowlingBall() {
 	Scene scene{ phongLightingShader() }; //createUniformColorShader ()
 
@@ -259,23 +268,17 @@ void playSoundAsync(const std::string& filePath) {
 		delete buffer;
 		}).detach(); 
 }
-=======
-
->>>>>>> parent of fc16689 (Commit 1 Working on rendering objects in scene)
 
 int main() {
 	
 	std::cout << std::filesystem::current_path() << std::endl;
-<<<<<<< HEAD
 
 	glm::vec3 boundingBoxSize = calculateBoundingBox("models/bowlingpin/Pin.obj");///"models/bowlingdevil/BOWLING BALL.obj" models/bowlingpin/Bowling_Pin.obj
 	std::cout << "Bounding box size (width, height, depth): "
 		<< boundingBoxSize.x << ", "
 		<< boundingBoxSize.y << ", "
 		<< boundingBoxSize.z << std::endl;
-=======
-	
->>>>>>> parent of fc16689 (Commit 1 Working on rendering objects in scene)
+
 	// Initialize the window and OpenGL.
 	sf::ContextSettings settings;
 	settings.depthBits = 24; // Request a 24 bits depth buffer
@@ -286,14 +289,11 @@ int main() {
 	sf::Window window(sf::VideoMode{ 1200, 800 }, "Modern OpenGL", sf::Style::Resize | sf::Style::Close, settings);
 
 	gladLoadGL();
-	glEnable(GL_DEPTH_TEST);
+	//glEnable(GL_DEPTH_TEST);
 
 	// Inintialize scene objects.
-<<<<<<< HEAD
-	auto myScene = lifeOfPi(); ; // ;// cube();// lifeOfPi();bowlingBall()
-=======
-	auto myScene = lifeOfPi();
->>>>>>> parent of fc16689 (Commit 1 Working on rendering objects in scene)
+
+	auto myScene = bowlingBall();
 	// You can directly access specific objects in the scene using references.
 	auto& firstObject = myScene.objects[0];
 
