@@ -9,10 +9,5 @@ in vec2 TexCoord;
 uniform sampler2D baseTexture;
 
 void main() {
-    vec4 texColor = texture(baseTexture, TexCoord);
-    if (texColor.a == 0.0) { // This check might fail for textures without alpha channels
-        texColor = vec4(1.0, 0.0, 0.0, 1.0);
-    }
-
     FragColor = texture(baseTexture, TexCoord);
 }

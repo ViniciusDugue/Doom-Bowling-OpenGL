@@ -47,14 +47,8 @@ Mesh3D fromAssimpMesh(const aiMesh* mesh, const aiScene* scene, const std::files
 	// of each eleemnt of mNormals.
 	for (size_t i = 0; i < mesh->mNumVertices; i++) {
 		auto& meshVertex = mesh->mVertices[i];
-		float u = 0.0f, v = 0.0f;
-		if (mesh->mTextureCoords[0]) {
-			auto& texCoord = mesh->mTextureCoords[0][i];
-			u = texCoord.x;
-			v = texCoord.y;
-		}
+		auto& texCoord = mesh->mTextureCoords[0][i];
 		auto& normal = mesh->mNormals[i];
-		vertices.push_back({ meshVertex.x, meshVertex.y, meshVertex.z,normal.x, normal.y, normal.z, u, v });
 
 		// See above.
 	}
@@ -67,9 +61,6 @@ Mesh3D fromAssimpMesh(const aiMesh* mesh, const aiScene* scene, const std::files
 	// the faces list.
 	for (size_t i = 0; i < mesh->mNumFaces; i++) {
 		auto& meshFace = mesh->mFaces[i];
-		faces.push_back(meshFace.mIndices[0]);
-		faces.push_back(meshFace.mIndices[1]);
-		faces.push_back(meshFace.mIndices[2]);
 		// See above.
 
 

@@ -24,5 +24,4 @@ void main() {
     
     // TODO: transform the vertex position into world space, and assign it to FragWorldPos.
 
-    FragWorldPos = vec3(model * vec4(vPosition, 1.0));
 }
