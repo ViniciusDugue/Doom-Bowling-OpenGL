@@ -222,28 +222,32 @@ Scene bowlingBall() {
 	Scene scene{ phongLightingShader() }; //createUniformColorShader ()
 
 	auto alley = assimpLoad("models/bowlingalley/alley.obj", true);//models/bowlingdevil/devilbowlingball.obj models/Tree/tree01.obj models/bowlingpin/Pin.obj
-	auto devilbowlingball = assimpLoad("models/bowlingdevil/devilbowlingball.obj", true);
+	alley.move(glm::vec3(0, -0.5, 0));
+	alley.grow(glm::vec3(0.2f, 0.2f, 0.2f));
+	scene.objects.push_back(std::move(alley));
 
+	auto devilbowlingball = assimpLoad("models/bowlingdevil/devilbowlingball.obj", true);
 	devilbowlingball.move(glm::vec3(0, -0.5, 0));
 	devilbowlingball.grow(glm::vec3(0.2f,0.2f, 0.2f));
-	 
+	scene.objects.push_back(std::move(devilbowlingball));
 
 	auto boat = assimpLoad("models/boat/boat.fbx", true);
 	boat.move(glm::vec3(0, -0.7, 0));
 	boat.grow(glm::vec3(0.01, 0.01, 0.01));
+	scene.objects.push_back(std::move(boat));
 
 	auto skybox = assimpLoad("models/Skybox/hellskybox.obj", true);//models/bowlingdevil/devilbowlingball.obj models/Tree/tree01.obj models/bowlingpin/Pin.obj
-
 	skybox.move(glm::vec3(0, 0, -40));
 	skybox.grow(glm::vec3(20, 20, 20));
 	skybox.rotate(glm::vec3(glm::radians(90.0f), glm::radians(-90.0f),0 ));
-	scene.objects.push_back(std::move(devilbowlingball));
-	scene.objects.push_back(std::move(boat));
 	scene.objects.push_back(std::move(skybox));
+	
+	
+	
 
 	Animator ballAnimator;
 
-	ballAnimator.addAnimation(std::make_unique<RotationAnimation>(scene.objects[0], 10, glm::vec3(0, 0.5 * M_PI, 0)));
+	ballAnimator.addAnimation(std::make_unique<RotationAnimation>(scene.objects[1], 10, glm::vec3(0, 0.5 * M_PI, 0)));
 
 	scene.animators.push_back(std::move(ballAnimator));
 
@@ -291,7 +295,7 @@ int main() {
 	glEnable(GL_DEPTH_TEST);
 
 	// Inintialize scene objects.
-	auto myScene = bowlingBall(); ; // ;// cube();// lifeOfPi();
+	auto myScene = lifeOfPi(); ; // ;// cube();// lifeOfPi();bowlingBall()
 	// You can directly access specific objects in the scene using references.
 	auto& firstObject = myScene.objects[0];
 
@@ -331,7 +335,7 @@ int main() {
 
 			if (ev.type == sf::Event::KeyPressed) {
 				if (ev.key.code == sf::Keyboard::Space) {
-					playSoundAsync("C:/Users/ViniciusDugue/CECS 449/proj/sounds/bowserlaugh.wav");
+					playSoundAsync("C:/Users/vinic/CECS 449/proj/sounds/bowserlaugh.wav");
 				}
 			}
 		}
