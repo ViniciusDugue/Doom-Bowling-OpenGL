@@ -266,7 +266,7 @@ void playSoundAsync(const std::string& filePath) {
 
 	std::thread([sound, buffer]() {
 		while (sound->getStatus() == sf::Sound::Playing) {
-			sf::sleep(sf::milliseconds(100)); 
+			sf::sleep(sf::milliseconds(1000)); 
 		}
 		delete sound;
 		delete buffer;
@@ -295,7 +295,7 @@ int main() {
 	glEnable(GL_DEPTH_TEST);
 
 	// Inintialize scene objects.
-	auto myScene = lifeOfPi(); ; // ;// cube();// lifeOfPi();bowlingBall()
+	auto myScene = bowlingBall(); ; // ;// cube();// lifeOfPi();
 	// You can directly access specific objects in the scene using references.
 	auto& firstObject = myScene.objects[0];
 
@@ -335,7 +335,7 @@ int main() {
 
 			if (ev.type == sf::Event::KeyPressed) {
 				if (ev.key.code == sf::Keyboard::Space) {
-					playSoundAsync("C:/Users/vinic/CECS 449/proj/sounds/bowserlaugh.wav");
+					playSoundAsync("C:/Users/ViniciusDugue/CECS 449/proj/sounds/discord.mp3");//ViniciusDugue vinic
 				}
 			}
 		}
