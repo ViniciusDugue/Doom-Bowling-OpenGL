@@ -242,7 +242,10 @@ Scene bowlingBall() {
 	skybox.rotate(glm::vec3(glm::radians(90.0f), glm::radians(-90.0f),0 ));
 	scene.objects.push_back(std::move(skybox));
 	
-	
+	auto missile = assimpLoad("models/missile/missile.obj", true);
+	missile.move(glm::vec3(0, -0.7, 0));
+	missile.grow(glm::vec3(0.01, 0.01, 0.01));
+	scene.objects.push_back(std::move(missile));
 	
 
 	Animator ballAnimator;
