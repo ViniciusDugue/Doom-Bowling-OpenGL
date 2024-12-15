@@ -1,8 +1,8 @@
-# Blender MTL File: 'Vympel_R-77.blend'
-# Material Count: 4
+# Blender 4.0.0 MTL File: 'None'
+# www.blender.org
 
-newmtl Material
-Ns 749.999996
+newmtl Material.001
+Ns 750.000000
 Ka 1.000000 1.000000 1.000000
 Kd 0.651233 0.646883 0.582599
 Ks 0.500000 0.500000 0.500000
@@ -10,9 +10,10 @@ Ke 0.000000 0.000000 0.000000
 Ni 1.000000
 d 1.000000
 illum 2
+map_Kd Combined_Texture.png
 
-newmtl Material.001
-Ns 96.078431
+newmtl Material.002
+Ns 96.078453
 Ka 1.000000 1.000000 1.000000
 Kd 0.046242 0.038099 0.027873
 Ks 0.045419 0.045419 0.045419
@@ -20,9 +21,10 @@ Ke 0.000000 0.000000 0.000000
 Ni 1.000000
 d 1.000000
 illum 2
+map_Kd Combined_Texture.png
 
-newmtl Material.002
-Ns 749.999996
+newmtl Material.003
+Ns 750.000000
 Ka 1.000000 1.000000 1.000000
 Kd 0.640000 0.002977 0.005983
 Ks 0.500000 0.500000 0.500000
@@ -30,13 +32,14 @@ Ke 0.000000 0.000000 0.000000
 Ni 1.000000
 d 1.000000
 illum 2
+map_Kd Combined_Texture.png
 
-newmtl Material.003
-Ns 194.117647
+newmtl Material.004
+Ns 194.117691
 Ka 1.000000 1.000000 1.000000
-Kd 0.003393 0.003393 0.003393
 Ks 0.013605 0.013605 0.013605
 Ke 0.000000 0.000000 0.000000
 Ni 1.000000
 d 1.000000
 illum 2
+map_Kd Combined_Texture.png

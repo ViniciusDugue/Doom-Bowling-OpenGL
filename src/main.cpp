@@ -221,38 +221,39 @@ Scene lifeOfPi() {
 Scene bowlingBall() {
 	Scene scene{ phongLightingShader() }; //createUniformColorShader ()
 
-	auto alley = assimpLoad("models/bowlingalley/alley.obj", true);//models/bowlingdevil/devilbowlingball.obj models/Tree/tree01.obj models/bowlingpin/Pin.obj
-	alley.move(glm::vec3(0, -0.5, 0));
-	alley.grow(glm::vec3(0.2f, 0.2f, 0.2f));
-	scene.objects.push_back(std::move(alley));
+	//auto alley = assimpLoad("models/bowlingalley/alley.obj", true);//models/bowlingdevil/devilbowlingball.obj models/Tree/tree01.obj models/bowlingpin/Pin.obj
+	//alley.move(glm::vec3(0, -0.5, 0));
+	//alley.grow(glm::vec3(0.2f, 0.2f, 0.2f));
+	//scene.objects.push_back(std::move(alley));
 
-	auto devilbowlingball = assimpLoad("models/bowlingdevil/devilbowlingball.obj", true);
-	devilbowlingball.move(glm::vec3(0, -0.5, 0));
-	devilbowlingball.grow(glm::vec3(0.2f,0.2f, 0.2f));
-	scene.objects.push_back(std::move(devilbowlingball));
+	//auto devilbowlingball = assimpLoad("models/bowlingdevil/devilbowlingball.obj", true);
+	//devilbowlingball.move(glm::vec3(0, -0.5, 0));
+	//devilbowlingball.grow(glm::vec3(0.2f,0.2f, 0.2f));
+	//scene.objects.push_back(std::move(devilbowlingball));
 
-	auto boat = assimpLoad("models/boat/boat.fbx", true);
+	/*auto boat = assimpLoad("models/boat/boat.fbx", true);
 	boat.move(glm::vec3(0, -0.7, 0));
 	boat.grow(glm::vec3(0.01, 0.01, 0.01));
-	scene.objects.push_back(std::move(boat));
+	scene.objects.push_back(std::move(boat));*/
 
-	auto skybox = assimpLoad("models/Skybox/hellskybox.obj", true);//models/bowlingdevil/devilbowlingball.obj models/Tree/tree01.obj models/bowlingpin/Pin.obj
-	skybox.move(glm::vec3(0, 0, -40));
-	skybox.grow(glm::vec3(20, 20, 20));
-	skybox.rotate(glm::vec3(glm::radians(90.0f), glm::radians(-90.0f),0 ));
-	scene.objects.push_back(std::move(skybox));
+	//auto skybox = assimpLoad("models/Skybox/hellskybox.obj", true);//models/bowlingdevil/devilbowlingball.obj models/Tree/tree01.obj models/bowlingpin/Pin.obj
+	//skybox.move(glm::vec3(0, 0, -40));
+	//skybox.grow(glm::vec3(20, 20, 20));
+	//skybox.rotate(glm::vec3(glm::radians(90.0f), glm::radians(-90.0f),0 ));
+	//scene.objects.push_back(std::move(skybox));
 	
-	auto missile = assimpLoad("models/missile/missile.obj", true);
-	missile.move(glm::vec3(0, -0.7, 0));
-	missile.grow(glm::vec3(0.01, 0.01, 0.01));
+	auto missile = assimpLoad("models/missile/missile1.obj", true);
+	missile.move(glm::vec3(0, 0, 0));
+	missile.grow(glm::vec3(0.2, 0.2, 0.2));
+	missile.rotate(glm::vec3(glm::radians(90.0f), glm::radians(-90.0f), 0));
 	scene.objects.push_back(std::move(missile));
 	
 
-	Animator ballAnimator;
+	/*Animator ballAnimator;
 
-	ballAnimator.addAnimation(std::make_unique<RotationAnimation>(scene.objects[1], 10, glm::vec3(0, 0.5 * M_PI, 0)));
+	ballAnimator.addAnimation(std::make_unique<RotationAnimation>(scene.objects[1], 10, glm::vec3(0, 0.5 * M_PI, 0)));*/
 
-	scene.animators.push_back(std::move(ballAnimator));
+	/*scene.animators.push_back(std::move(ballAnimator));*/
 
 	return scene;
 }
@@ -280,7 +281,7 @@ int main() {
 	
 	std::cout << std::filesystem::current_path() << std::endl;
 
-	glm::vec3 boundingBoxSize = calculateBoundingBox("models/bowlingpin/Pin.obj");///"models/bowlingdevil/BOWLING BALL.obj" models/bowlingpin/Bowling_Pin.obj
+	glm::vec3 boundingBoxSize = calculateBoundingBox("models/missile/missile.obj");///"models/bowlingdevil/BOWLING BALL.obj" models/bowlingpin/Bowling_Pin.obj
 	std::cout << "Bounding box size (width, height, depth): "
 		<< boundingBoxSize.x << ", "
 		<< boundingBoxSize.y << ", "
@@ -344,7 +345,7 @@ int main() {
 		}
 		auto now = c.getElapsedTime();
 		auto diff = now - last;
-		std::cout << 1 / diff.asSeconds() << " FPS " << std::endl;
+		/*std::cout << 1 / diff.asSeconds() << " FPS " << std::endl;*/
 		last = now;
 
 
