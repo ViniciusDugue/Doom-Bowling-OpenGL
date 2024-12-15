@@ -109,6 +109,16 @@ glm::vec3 calculateBoundingBox(const std::string& objFilePath) {
 	return maxPoint - minPoint; 
 }
 
+void createObject(Scene& scene, const std::string& path, glm::vec3 position, glm::vec3 scale, glm::vec3 rotation = glm::vec3(0)) {
+	auto object = assimpLoad(path, true);
+	object.move(position);
+	object.grow(scale);
+	object.rotate(rotation);
+	scene.objects.push_back(std::move(object));
+}
+
+
+
 /*****************************************************************************************
 *  DEMONSTRATION SCENES
 *****************************************************************************************/
@@ -219,35 +229,27 @@ Scene lifeOfPi() {
 }
 
 Scene bowlingBall() {
-	Scene scene{ phongLightingShader() }; //createUniformColorShader ()
+	Scene scene{ phongLightingShader() };
 
-	//auto alley = assimpLoad("models/bowlingalley/alley.obj", true);//models/bowlingdevil/devilbowlingball.obj models/Tree/tree01.obj models/bowlingpin/Pin.obj
-	//alley.move(glm::vec3(0, -0.5, 0));
-	//alley.grow(glm::vec3(0.2f, 0.2f, 0.2f));
-	//scene.objects.push_back(std::move(alley));
+	createObject(scene, "models/bowlingalley/alley.obj", glm::vec3(0, -0.8, 0.5), glm::vec3(0.2, 0.2, 0.5));
 
-	//auto devilbowlingball = assimpLoad("models/bowlingdevil/devilbowlingball.obj", true);
-	//devilbowlingball.move(glm::vec3(0, -0.5, 0));
-	//devilbowlingball.grow(glm::vec3(0.2f,0.2f, 0.2f));
-	//scene.objects.push_back(std::move(devilbowlingball));
-
-	/*auto boat = assimpLoad("models/boat/boat.fbx", true);
-	boat.move(glm::vec3(0, -0.7, 0));
-	boat.grow(glm::vec3(0.01, 0.01, 0.01));
-	scene.objects.push_back(std::move(boat));*/
-
-	//auto skybox = assimpLoad("models/Skybox/hellskybox.obj", true);//models/bowlingdevil/devilbowlingball.obj models/Tree/tree01.obj models/bowlingpin/Pin.obj
-	//skybox.move(glm::vec3(0, 0, -40));
-	//skybox.grow(glm::vec3(20, 20, 20));
-	//skybox.rotate(glm::vec3(glm::radians(90.0f), glm::radians(-90.0f),0 ));
-	//scene.objects.push_back(std::move(skybox));
+	/*createObject(scene, "models/bowlingdevil/devilbowlingball.obj", glm::vec3(0, -0.5, -2), glm::vec3(0.2, 0.2, 0.2), glm::vec3(0, glm::radians(90.0f), 0));*/
+	createObject(scene, "models/Skybox/hellskybox.obj", glm::vec3(0, 0, -40), glm::vec3(20, 20, 20), glm::vec3(glm::radians(90.0f), glm::radians(-90.0f), 0));
+	/*createObject(scene, "models/missile/missile1.obj", glm::vec3(0, 0, 0), glm::vec3(0.2f, 0.2f, 0.2f), glm::vec3(glm::radians(90.0f), glm::radians(-90.0f), 0));*/
 	
-	auto missile = assimpLoad("models/missile/missile1.obj", true);
-	missile.move(glm::vec3(0, 0, 0));
-	missile.grow(glm::vec3(0.2, 0.2, 0.2));
-	missile.rotate(glm::vec3(glm::radians(90.0f), glm::radians(-90.0f), 0));
-	scene.objects.push_back(std::move(missile));
-	
+	createObject(scene, "models/bowlingpin/Pin.obj", glm::vec3(-0.3, -0.8, -5), glm::vec3(0.2, 0.2, 0.2));
+	createObject(scene, "models/bowlingpin/Pin.obj", glm::vec3(0.3, -0.8, -5), glm::vec3(0.2, 0.2, 0.2));
+	createObject(scene, "models/bowlingpin/Pin.obj", glm::vec3(-0.9, -0.8, -5), glm::vec3(0.2, 0.2, 0.2));
+	createObject(scene, "models/bowlingpin/Pin.obj", glm::vec3(0.9, -0.8, -5), glm::vec3(0.2, 0.2, 0.2));
+
+	createObject(scene, "models/bowlingpin/Pin.obj", glm::vec3(0.0, -0.8, -4.2), glm::vec3(0.2, 0.2, 0.2));
+	createObject(scene, "models/bowlingpin/Pin.obj", glm::vec3(-0.6, -0.8, -4.2), glm::vec3(0.2, 0.2, 0.2));
+	createObject(scene, "models/bowlingpin/Pin.obj", glm::vec3(0.6, -0.8, -4.2), glm::vec3(0.2, 0.2, 0.2));
+
+	createObject(scene, "models/bowlingpin/Pin.obj", glm::vec3(-0.3, -0.8, -3.6), glm::vec3(0.2, 0.2, 0.2));
+	createObject(scene, "models/bowlingpin/Pin.obj", glm::vec3(0.3, -0.8, -3.6), glm::vec3(0.2, 0.2, 0.2));
+
+	createObject(scene, "models/bowlingpin/Pin.obj", glm::vec3(0.0, -0.8, -2.8), glm::vec3(0.2, 0.2, 0.2));
 
 	/*Animator ballAnimator;
 
@@ -349,7 +351,7 @@ int main() {
 		last = now;
 
 
-		glm::vec3 cameraPos = glm::vec3(0, 0, 5);
+		glm::vec3 cameraPos = glm::vec3(0, 1, 5);
 		glm::mat4 camera = glm::lookAt(cameraPos, glm::vec3(0, 0, 0), glm::vec3(0, 1, 0));
 		glm::mat4 perspective = glm::perspective(glm::radians(45.0), static_cast<double>(window.getSize().x) / window.getSize().y, 0.1, 100.0);
 		myScene.program.setUniform("view", camera);
