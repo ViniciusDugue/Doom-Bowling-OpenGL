@@ -2,6 +2,11 @@
 #include <memory>
 #include "Animation.h"
 #include "RotationAnimation.h"
+#include "TranslationAnimation.h"
+#include "MoveToAnimation.h"
+#include "DelayAnimation.h"
+#include "BezierCurveAnimation.h"
+#include "SinBouncingAnimation.h"
 
 class Animator {
 private:
@@ -58,5 +63,4 @@ public:
 	 * @brief Advance the animation sequence by the given time interval, in seconds.
 	 */
 	void tick(float dt);
-
 };

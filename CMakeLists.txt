@@ -12,7 +12,7 @@ endif()
 
 project ("Graphics")
 
-add_executable (Graphics "src/main.cpp"  "include/AssimpImport.h" "include/Mesh3D.h" "include/Object3D.h" "include/ShaderProgram.h"  "src/Mesh3D.cpp" "src/Object3D.cpp" "src/ShaderProgram.cpp" "include/Texture.h"  "include/StbImage.h" "include/stb_image.h" "include/Animation.h" "include/Animator.h" "include/RotationAnimation.h" "src/Animator.cpp" "src/AssimpImport.cpp" "src/StbImage.cpp"  "include/helperfunctions.h")
+add_executable (Graphics "src/main.cpp"  "include/AssimpImport.h" "include/Mesh3D.h" "include/Object3D.h" "include/ShaderProgram.h"  "src/Mesh3D.cpp" "src/Object3D.cpp" "src/ShaderProgram.cpp" "include/Texture.h"  "include/StbImage.h" "include/stb_image.h" "include/Animation.h" "include/Animator.h" "include/RotationAnimation.h" "src/Animator.cpp" "src/AssimpImport.cpp" "src/StbImage.cpp"   "include/TranslationAnimation.h"  "include/BezierCurveAnimation.h" "include/SinBouncingAnimation.h" )
 
 
 # Find and link external libraries, like SFML.

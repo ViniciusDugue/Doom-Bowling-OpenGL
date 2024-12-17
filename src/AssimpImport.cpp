@@ -47,14 +47,28 @@ Mesh3D fromAssimpMesh(const aiMesh* mesh, const aiScene* scene, const std::files
 	// of each eleemnt of mNormals.
 	for (size_t i = 0; i < mesh->mNumVertices; i++) {
 		auto& meshVertex = mesh->mVertices[i];
+		auto& normal = mesh->mNormals[i];
 		float u = 0.0f, v = 0.0f;
 		if (mesh->mTextureCoords[0]) {
 			auto& texCoord = mesh->mTextureCoords[0][i];
 			u = texCoord.x;
 			v = texCoord.y;
 		}
-		auto& normal = mesh->mNormals[i];
-		vertices.push_back({ meshVertex.x, meshVertex.y, meshVertex.z,normal.x, normal.y, normal.z, u, v });
+
+		float tx = 0.0f, ty = 0.0f, tz = 0.0f;
+		float bx = 0.0f, by = 0.0f, bz = 0.0f;
+		if (mesh->mTangents && mesh->mBitangents) {
+			auto& tangent = mesh->mTangents[i];
+			auto& bitangent = mesh->mBitangents[i];
+			tx = tangent.x;
+			ty = tangent.y;
+			tz = tangent.z;
+			bx = bitangent.x;
+			by = bitangent.y;
+			bz = bitangent.z;
+		}
+
+		vertices.push_back({ meshVertex.x, meshVertex.y, meshVertex.z,normal.x, normal.y, normal.z, u, v, tx, ty, tz, bx, by, bz });
 
 		// See above.
 	}

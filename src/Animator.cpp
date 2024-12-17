@@ -1,4 +1,5 @@
 #include "Animator.h"
+#include "DelayAnimation.h"
 
 void Animator::nextAnimation() {
 	// Increase the animation index, and start the next animation if there is one.

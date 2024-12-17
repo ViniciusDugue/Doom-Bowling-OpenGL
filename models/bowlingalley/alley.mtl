@@ -11,4 +11,9 @@ Ni 1.000000
 d 1.000000
 illum 2
 
+
 map_Kd alley.jpg
+
+map_Ks specMap.png
+
+bump normalMap.png

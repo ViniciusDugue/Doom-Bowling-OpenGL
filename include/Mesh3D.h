@@ -17,9 +17,15 @@ struct Vertex3D {
 	float u;
 	float v;
 
+	//wtf, it turns out if you define these variables before the uv variables above, then the texture mapping 
+	// gets all messed up. Why is this the case????
+	float tx = 0.0f, ty = 0.0f, tz = 0.0f;
+	float bx = 0.0f, by = 0.0f, bz = 0.0f;
+
 	Vertex3D(float px, float py, float pz, float normX, float normY, float normZ,
-		float texU, float texV) :
-		x(px), y(py), z(pz), nx(normX), ny(normY), nz(normZ), u(texU), v(texV) {}
+		float texU, float texV, float tanX, float tanY, float tanZ, float bitX, float bitY, float bitZ) :
+		x(px), y(py), z(pz), nx(normX), ny(normY), nz(normZ), u(texU), v(texV),
+		tx(tanX), ty(tanY), tz(tanZ), bx(bitX), by(bitY), bz(bitZ) {}
 };
 
 class Mesh3D {
@@ -49,7 +55,7 @@ public:
 	/**
 	 * @brief Constructs a 1x1 square centered at the origin in world space.
 	*/
-	static Mesh3D square(const std::vector<Texture>& textures);
+	/*static Mesh3D square(const std::vector<Texture>& textures);*/
 	
 	/**
 	 * @brief Renders the mesh to the given context.

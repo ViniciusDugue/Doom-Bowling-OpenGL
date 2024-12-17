@@ -37,6 +37,13 @@ Mesh3D::Mesh3D(std::vector<Vertex3D>&& vertices, std::vector<uint32_t>&& faces, 
 	glVertexAttribPointer(2, 2, GL_FLOAT, false, sizeof(Vertex3D), (void*)24);
 	glEnableVertexAttribArray(2);
 
+	// tangent values
+	glVertexAttribPointer(3, 3, GL_FLOAT, GL_FALSE, sizeof(Vertex3D), (void*)32);
+	glEnableVertexAttribArray(3);
+
+	//bitangent values
+	glVertexAttribPointer(4, 3, GL_FLOAT, GL_FALSE, sizeof(Vertex3D), (void*)44);
+	glEnableVertexAttribArray(4);
 
 	// Generate a second buffer, to store the indices of each triangle in the mesh.
 	uint32_t ebo;
@@ -54,11 +61,17 @@ void Mesh3D::addTexture(Texture texture) {
 
 void Mesh3D::render(ShaderProgram& program) const {
 	glBindVertexArray(m_vao);
+	bool hasNormalMap = false;
+
 	for (auto i = 0; i < m_textures.size(); i++) {
 		program.setUniform(m_textures[i].samplerName, i);
 		glActiveTexture(GL_TEXTURE0 + i);
 		glBindTexture(GL_TEXTURE_2D, m_textures[i].textureId);
+		if (m_textures[i].samplerName == "normalMap") {
+			hasNormalMap = true;
+		}
 	}
+	program.setUniform("hasNormalMap", hasNormalMap);
 
 	// Draw the vertex array, using its "element buffer" to identify the faces.
 	glDrawElements(GL_TRIANGLES, m_faceCount, GL_UNSIGNED_INT, nullptr);
@@ -68,18 +81,18 @@ void Mesh3D::render(ShaderProgram& program) const {
 }
 
 
-Mesh3D Mesh3D::square(const std::vector<Texture>& textures) {
-	return Mesh3D(
-		{
-			{ 0.5, 0.5, 0, 0, 0, 1, 1, 0 },    // TR
-			{ 0.5, -0.5, 0, 0, 0, 1, 1, 1 },   // BR
-			{ -0.5, -0.5, 0, 0, 0, 1, 0, 1 },  // BL
-			{ -0.5, 0.5, 0, 0, 0, 1, 0, 0 },   // TL
-		},
-		{
-			2, 1, 3,
-			3, 1, 0,
-		},
-		std::vector<Texture>(textures)
-	);
-}
+//Mesh3D Mesh3D::square(const std::vector<Texture>& textures) {
+//	return Mesh3D(
+//		{
+//			{ 0.5, 0.5, 0, 0, 0, 1, 1, 0 },    // TR
+//			{ 0.5, -0.5, 0, 0, 0, 1, 1, 1 },   // BR
+//			{ -0.5, -0.5, 0, 0, 0, 1, 0, 1 },  // BL
+//			{ -0.5, 0.5, 0, 0, 0, 1, 0, 0 },   // TL
+//		},
+//		{
+//			2, 1, 3,
+//			3, 1, 0,
+//		},
+//		std::vector<Texture>(textures)
+//	);
+//}
