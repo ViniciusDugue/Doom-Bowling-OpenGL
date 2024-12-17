@@ -2,6 +2,12 @@
 #include <memory>
 #include "ShaderProgram.h"
 #include "Mesh3D.h"
+
+struct AdditiveForce {
+	glm::vec3 direction;
+	float magnitude;
+};
+
 class Object3D {
 private:
 	// The object's list of meshes and children.
@@ -26,6 +32,14 @@ private:
 	// Recomputes the local->world transformation matrix.
 	glm::mat4 buildModelMatrix() const;
 
+	glm::vec3 m_velocity = glm::vec3(0.0f, 0.0f, 0.0f);
+	glm::vec3 m_rotVelocity = glm::vec3(0.0f, 0.0f, 0.0f);
+	glm::vec3 m_rotAcceleration = glm::vec3(0.0f, 0.0f, 0.0f);
+
+	float m_mass;
+
+	std::vector<glm::vec3> m_constantForces;
+	std::vector<AdditiveForce> m_additiveForces;
 
 public:
 	// No default constructor; you must have a mesh to initialize an object.
@@ -65,4 +79,23 @@ public:
 	// Rendering.
 	void render(ShaderProgram& shaderProgram) const;
 	void renderRecursive(ShaderProgram& shaderProgram, const glm::mat4& parentMatrix) const;
+
+	//added physics functions
+	const glm::vec3& getVelocity() const;
+	void setVelocity(const glm::vec3& vel);
+
+	const glm::vec3& getRotVelocity() const;
+	void setRotVelocity(const glm::vec3& rotVel);
+
+	const glm::vec3& getRotAcceleration() const;
+	void setRotAcceleration(const glm::vec3& rotAccel);
+
+	float getMass() const;
+	void setMass(float mass);
+
+	void addConstantForce(const glm::vec3& force);
+
+	void addAdditiveForce(const glm::vec3& direction, float magnitude);
+
+	void tick(float dt, float dragCoefficient, float forceThreshold = 0.01f);
 };

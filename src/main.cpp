@@ -196,13 +196,38 @@ float fireMissiles(Scene& scene, float startDelay) {
 		scene.animators.push_back(std::move(missileAnimator));
 	}
 
-	// make pins disapear
-	for (int i = 2; i <= 11; ++i) {
-		Animator pinAnimator;
-		pinAnimator.addAnimation(std::make_unique<DelayAnimation>(scene.objects[i], totalDelay + moveDuration));
-		pinAnimator.addAnimation(std::make_unique<TranslationAnimation>(scene.objects[i], offScreenDuration, offScreenPosition - scene.objects[i].getPosition()));
-		scene.animators.push_back(std::move(pinAnimator));
-	}
+	// make pins disapear either by animation or adding force to them.
+	float pinDisappearDelay = totalDelay + moveDuration;
+	std::thread([&scene, pinDisappearDelay]() {
+		sf::sleep(sf::seconds(pinDisappearDelay));
+			for (int i = 2; i <= 11; ++i) {
+				scene.objects[i].setMass(200.0f);
+				scene.objects[i].setVelocity(glm::vec3(0.0f, 0.0f, 0.0f));//1.0f, 3.0f, 0.0f
+				scene.objects[i].setRotVelocity(glm::vec3(0.0f, 0.0f, 0.0f)); //glm::radians(0.0f)
+
+				float m = scene.objects[i].getMass();
+
+				scene.objects[i].addConstantForce(glm::vec3(0.0f, -9.8f * m, 0.0f));
+				if (i < 7)
+				{
+					scene.objects[i].addAdditiveForce(glm::vec3(1, 1, 0), 100.0f * m);
+					scene.objects[i].setRotAcceleration(glm::vec3(-1, 2, 4));
+				}
+				else
+				{
+					scene.objects[i].addAdditiveForce(glm::vec3(-1, 1, 0), 100.0f * m);
+					scene.objects[i].setRotAcceleration(glm::vec3(8, 0.5, -4));
+				}
+
+				//(dont need this if youre doing physics)
+				/*Animator pinAnimator;
+				pinAnimator.addAnimation(std::make_unique<DelayAnimation>(scene.objects[i], totalDelay + moveDuration));
+				pinAnimator.addAnimation(std::make_unique<TranslationAnimation>(scene.objects[i], offScreenDuration, offScreenPosition - scene.objects[i].getPosition()));
+				scene.animators.push_back(std::move(pinAnimator));*/
+			}
+		}).detach();
+
+	
 	return totalDelay + moveDuration + offScreenDuration;
 }
 
@@ -673,6 +698,20 @@ int main() {
 		auto diff = now - last;
 		/*std::cout << 1 / diff.asSeconds() << " FPS " << std::endl;*/
 		last = now;
+
+		float dt = diff.asSeconds();
+
+		for (auto& o : myScene.objects) {
+			float dragCoefficient = 10.0f;
+			float forceThreshold = 1.0f;
+			o.tick(dt, dragCoefficient, forceThreshold);
+
+			glm::vec3 pos = o.getPosition();
+			glm::vec3 vel = o.getVelocity();
+
+			o.setPosition(pos);
+			o.setVelocity(vel);
+		}
 
 		glm::vec3 cameraPos = glm::vec3(0, 0.5, 5);
 		glm::mat4 perspective = glm::perspective(glm::radians(45.0), static_cast<double>(window.getSize().x) / window.getSize().y, 0.01, 100.0);

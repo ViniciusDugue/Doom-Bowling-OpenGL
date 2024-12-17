@@ -129,3 +129,78 @@ void Object3D::renderRecursive(ShaderProgram& shaderProgram, const glm::mat4& pa
 		child.renderRecursive(shaderProgram, trueModel);
 	}
 }
+
+//addedd physics functions defined
+const glm::vec3& Object3D::getVelocity() const {
+	return m_velocity;
+}
+
+void Object3D::setVelocity(const glm::vec3& vel) {
+	m_velocity = vel;
+}
+
+const glm::vec3& Object3D::getRotVelocity() const {
+	return m_rotVelocity;
+}
+
+void Object3D::setRotVelocity(const glm::vec3& rotVel) {
+	m_rotVelocity = rotVel;
+}
+
+const glm::vec3& Object3D::getRotAcceleration() const {
+	return m_rotAcceleration;
+}
+
+void Object3D::setRotAcceleration(const glm::vec3& rotAccel) {
+	m_rotAcceleration = rotAccel;
+}
+
+float Object3D::getMass() const {
+	return m_mass;
+}
+
+void Object3D::setMass(float mass) {
+	m_mass = mass;
+}
+
+void Object3D::addConstantForce(const glm::vec3& force) {
+	m_constantForces.push_back(force);
+}
+
+void Object3D::addAdditiveForce(const glm::vec3& direction, float magnitude) {
+	AdditiveForce af;
+	glm::vec3 dir = glm::normalize(direction);
+	af.direction = dir;
+	af.magnitude = magnitude;
+	m_additiveForces.push_back(af);
+}
+
+void Object3D::tick(float dt, float dragCoefficient, float forceThreshold) {
+
+	glm::vec3 totalForce(0.0f);
+	for (auto& f : m_constantForces) {
+		totalForce += f;
+	}
+
+	std::vector<AdditiveForce> remainingForces;
+	remainingForces.reserve(m_additiveForces.size());
+
+	for (auto& af : m_additiveForces) {
+		totalForce += af.direction * af.magnitude;
+
+		af.magnitude -= dragCoefficient * dt * af.magnitude;
+		if (af.magnitude >= forceThreshold) {
+			remainingForces.push_back(af);
+		}
+	}
+
+	m_additiveForces = std::move(remainingForces);
+
+	glm::vec3 acceleration = totalForce / m_mass;
+
+	m_velocity += acceleration * dt;
+	m_position += m_velocity * dt;
+
+	m_rotVelocity += m_rotAcceleration * dt;
+	m_orientation += m_rotVelocity * dt;
+}
