@@ -97,5 +97,7 @@ public:
 
 	void addAdditiveForce(const glm::vec3& direction, float magnitude);
 
+	void resetForces();
+
 	void tick(float dt, float dragCoefficient, float forceThreshold = 0.01f);
 };

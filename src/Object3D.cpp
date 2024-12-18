@@ -204,3 +204,11 @@ void Object3D::tick(float dt, float dragCoefficient, float forceThreshold) {
 	m_rotVelocity += m_rotAcceleration * dt;
 	m_orientation += m_rotVelocity * dt;
 }
+
+void Object3D::resetForces() {
+	m_constantForces.clear();
+	m_additiveForces.clear();
+	m_velocity = glm::vec3(0.0f);
+	m_rotVelocity = glm::vec3(0.0f);
+	m_rotAcceleration = glm::vec3(0.0f);
+}

@@ -135,7 +135,7 @@ float tiltPins(Scene& scene, float startDelay) {
 float cascadeJump(Scene& scene, float startDelay) {
 	float jumpHeight = 0.5f;
 	float jumpDuration = 0.5f;
-	float delayBetweenRows = 0.09f;
+	float delayBetweenRows = 0.2f;
 	float totalDelay = startDelay;
 
 	std::vector<std::vector<int>> rows = {
@@ -201,10 +201,8 @@ float fireMissiles(Scene& scene, float startDelay) {
 	std::thread([&scene, pinDisappearDelay]() {
 		sf::sleep(sf::seconds(pinDisappearDelay));
 			for (int i = 2; i <= 11; ++i) {
+				scene.objects[i].resetForces();
 				scene.objects[i].setMass(200.0f);
-				scene.objects[i].setVelocity(glm::vec3(0.0f, 0.0f, 0.0f));//1.0f, 3.0f, 0.0f
-				scene.objects[i].setRotVelocity(glm::vec3(0.0f, 0.0f, 0.0f)); //glm::radians(0.0f)
-
 				float m = scene.objects[i].getMass();
 
 				scene.objects[i].addConstantForce(glm::vec3(0.0f, -9.8f * m, 0.0f));
@@ -262,19 +260,22 @@ float Hellstrike(Scene& scene, float startDelay = 0.0f) {
 	return startDelay + duration;
 }
 
-void deletePin(Scene& scene, int pinIndex, glm::vec3 deleteTranslation, std::set<int>& deletedPins, float duration = 1.0f) {
+void deletePin(Scene& scene, int pinIndex, const glm::vec3& shotDirection, std::set<int>& deletedPins) {
 	if (deletedPins.find(pinIndex) != deletedPins.end())
 	{
 		return;
 	}
 
 	deletedPins.insert(pinIndex);
-	glm::vec3 currentPosition = scene.objects[pinIndex].getPosition();
-	glm::vec3 targetPosition = currentPosition + deleteTranslation;
+	scene.objects[pinIndex].resetForces();
+	scene.objects[pinIndex].setMass(200.0f);
+	float m = scene.objects[pinIndex].getMass();
 
-	Animator animator;
-	animator.addAnimation(std::make_unique<MoveToAnimation>(scene.objects[pinIndex], duration, targetPosition));
-	scene.animators.push_back(std::move(animator));
+	/*scene.objects[pinIndex].setVelocity(shotDirection * 100 * m);*/
+	deletedPins.insert(pinIndex);
+	scene.objects[pinIndex].addAdditiveForce(shotDirection, 400 * m);
+	scene.objects[pinIndex].addAdditiveForce(glm::vec3(0, 1, 0), 200 * m);
+	scene.objects[pinIndex].addConstantForce(glm::vec3(0.0f, -9.8f * m, 0.0f));
 
 	//choose random death noise
 	static std::random_device rd;
@@ -296,6 +297,7 @@ bool isPinInAim(const Scene& scene, const glm::vec3& cameraPos, const glm::vec3&
 		glm::vec3 toPin = glm::normalize(glm::vec3(pinPosition.x - cameraPos.x, 0, pinPosition.z - cameraPos.z));
 		glm::vec3 flatLookDirection = glm::normalize(glm::vec3(lookDirection.x, 0, lookDirection.z));
 
+		// angle between cameralook and pin.
 		float angle = glm::degrees(glm::acos(glm::clamp(glm::dot(flatLookDirection, toPin), -1.0f, 1.0f)));
 		if (angle <= thresholdAngle) {
 			hitPinIndex = i;
@@ -307,17 +309,18 @@ bool isPinInAim(const Scene& scene, const glm::vec3& cameraPos, const glm::vec3&
 	return false;
 }
 
-float resetPins(Scene& scene, const glm::vec3& deletionTranslation, float duration = 1.0f, float startDelay = 1.0f) {
+float resetPins(Scene& scene, const std::vector<glm::vec3>& originalPinPositions, float duration = 1.0f, float startDelay = 1.0f) {
 	float totalDelay = startDelay;
 
 	for (int i = 2; i <= 11; ++i) {
-		glm::vec3 currentPosition = scene.objects[i].getPosition();
-		glm::vec3 originalPosition = currentPosition - deletionTranslation;
+		scene.objects[i].resetForces();
+		glm::vec3 originalPosition = originalPinPositions[i-2];
 
 		Animator animator;
 		animator.addAnimation(std::make_unique<DelayAnimation>(scene.objects[i], totalDelay));
 		animator.addAnimation(std::make_unique<MoveToAnimation>(scene.objects[i], duration, originalPosition));
 		scene.animators.push_back(std::move(animator));
+		std::cout << "pin: "<<i<<"Position:"<< scene.objects[i].getPosition() << std::endl;
 	}
 
 	return totalDelay + duration;
@@ -560,6 +563,11 @@ int main() {
 	bool isStrikePlayed = false;
 	glm::vec3 pinDeletionTranslation = glm::vec3(0, -5, 10);
 	std::set<int> deletedPins;
+	std::vector<glm::vec3> originalPinPositions = {
+	glm::vec3(0.0, -0.8, -2.8), 
+	glm::vec3(-0.3, -0.8, -3.6), glm::vec3(0.3, -0.8, -3.6),
+	glm::vec3(-0.6, -0.8, -4.2), glm::vec3(0.0, -0.8, -4.2), glm::vec3(0.6, -0.8, -4.2),
+	glm::vec3(-0.9, -0.8, -5.0), glm::vec3(-0.3, -0.8, -5.0), glm::vec3(0.3, -0.8, -5.0), glm::vec3(0.9, -0.8, -5.0)};
 
 	playSound("C:/Users/ViniciusDugue/CECS 449/proj/sounds/doomost.wav");
 
@@ -596,7 +604,10 @@ int main() {
 					int hitPinIndex = -1;
 					if (isPinInAim(myScene, cameraPos, rayDirection, deletedPins, hitPinIndex)) {
 
-						deletePin(myScene, hitPinIndex, pinDeletionTranslation, deletedPins, 0.1f);
+						glm::vec3 flatLookDirection = glm::normalize(glm::vec3(rayDirection.x, 0, rayDirection.z));
+
+						//deletePin(myScene, hitPinIndex, pinDeletionTranslation, deletedPins, 0.1f);
+						deletePin(myScene, hitPinIndex, flatLookDirection, deletedPins);
 						std::cout << "Pin hit: " << hitPinIndex << " " << std::endl;
 						pinCounter += 1;
 					}
@@ -613,11 +624,21 @@ int main() {
 
 				pinCounter = 0;
 				isStrikePlayed = true;
-				for (auto& anim : myScene.animators) {
-					anim.tick(0.1f);
+
+				//add delay for deleting pins with physics(last pin will disappear instead of seeing it fly away wcyd
+				for (auto& o : myScene.objects) {
+					float dragCoefficient = 10.0f;
+					float forceThreshold = 1.0f;
+					o.tick(0.3, dragCoefficient, forceThreshold);
+
+					glm::vec3 pos = o.getPosition();
+					glm::vec3 vel = o.getVelocity();
+
+					o.setPosition(pos);
+					o.setVelocity(vel);
 				}
 
-				float resetPinDuration = resetPins(myScene, pinDeletionTranslation,1.0f, 1.0f);
+				float resetPinDuration = resetPins(myScene, originalPinPositions, 1.5f, 2.0f);
 
 				float tiltDuration = tiltPins(myScene, resetPinDuration);
 
@@ -647,7 +668,7 @@ int main() {
 					playSound("C:/Users/ViniciusDugue/CECS 449/proj/sounds/hellstrike.wav");
 					}).detach();
 
-				// calling animators fo this if block
+				// calling animators for this if block
 				for (auto& anim : myScene.animators) {
 					anim.start();
 				}
@@ -676,7 +697,7 @@ int main() {
 				lookAt.y = 0.0f;
 
 
-				//moveing doom ui object so its in front of camera and changing orientation to match camera
+				//moving doom ui object so its in front of camera and changing orientation to match camera
 				float uiDistance = 0.15f;
 				glm::vec3 forwardDirection = glm::normalize(lookAt - cameraPos);
 				forwardDirection.y = 0.0f;
