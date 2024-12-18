@@ -245,6 +245,18 @@ float moveDevil(Scene& scene, float startDelay) {
 	bouncingAnimator.addAnimation(std::make_unique<DelayAnimation>(scene.objects[17], totalDelay));
 	bouncingAnimator.addAnimation(std::make_unique<SinBouncingAnimation>(scene.objects[17], bounceDuration, bounceFrequency));
 	scene.animators.push_back(std::move(bouncingAnimator));
+	
+	/*Object3D& bowlingball = scene.objects[17].getChild(0);
+	Animator bowlingballAnimator;
+	bowlingballAnimator.addAnimation(std::make_unique<DelayAnimation>(bowlingball, totalDelay));
+	bowlingballAnimator.addAnimation(std::make_unique<SinBouncingAnimation>(bowlingball, bounceDuration, bounceFrequency));
+	scene.animators.push_back(std::move(bowlingballAnimator));*/
+
+	/*Object3D& tail = scene.objects[17].getChild(1);
+	Animator tailAnimator;
+	tailAnimator.addAnimation(std::make_unique<DelayAnimation>(tail, totalDelay));
+	tailAnimator.addAnimation(std::make_unique<SinBouncingAnimation>(tail, bounceDuration, bounceFrequency));
+	scene.animators.push_back(std::move(tailAnimator));*/
 
 	return totalDelay + bezierDuration;
 }
@@ -463,7 +475,7 @@ Scene bowlingBall() {
 	createObject(scene, "models/missile/missile1.obj", glm::vec3(3, 7, 3), glm::vec3(0.2f, 0.2f, 0.2f), glm::vec3(0.701, -0.322, 0));
 	createObject(scene, "models/missile/missile1.obj", glm::vec3(6, 7, 3), glm::vec3(0.2f, 0.2f, 0.2f), glm::vec3(0.637, -0.588, 0));
 
-	createObject(scene, "models/bowlingdevil/devilbowlingball.obj", glm::vec3(20, -0.5, 0), glm::vec3(0.2, 0.2, 0.2), glm::vec3(0, glm::radians(90.0f), 0));
+	createObject(scene, "models/bowlingdevil/devilbowlingball_tail.obj", glm::vec3(20, -0.5, 0), glm::vec3(0.2, 0.2, 0.2), glm::vec3(0, glm::radians(90.0f), 0));
 
 	createObject(scene, "models/doomui/doomui.obj", glm::vec3(0, 0.4935, 4.85), glm::vec3(0.065, 0.065, 0.065), glm::vec3(0, 0, 0));
 	createObject(scene, "models/StrikeVisual/hellstrike.obj", glm::vec3(0, -2, 4.1), glm::vec3(0.5, 0.5, 0.05), glm::vec3(0, 0, 0));
@@ -714,7 +726,7 @@ int main() {
 
 			}
 		}
-
+		
 		auto now = c.getElapsedTime();
 		auto diff = now - last;
 		/*std::cout << 1 / diff.asSeconds() << " FPS " << std::endl;*/
