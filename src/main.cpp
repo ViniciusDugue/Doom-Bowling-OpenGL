@@ -294,7 +294,7 @@ void deletePin(Scene& scene, int pinIndex, const glm::vec3& shotDirection, std::
 	static std::mt19937 gen(rd());
 	std::uniform_int_distribution<int> dist(1, 4);
 	int randomSoundIndex = dist(gen);
-	std::string soundFilePath = "C:/Users/ViniciusDugue/CECS 449/proj/sounds/death" + std::to_string(randomSoundIndex) + ".wav";
+	std::string soundFilePath = "C:/Users/vinic/CECS 449/proj/sounds/death" + std::to_string(randomSoundIndex) + ".wav";
 	playSound(soundFilePath);
 }
 
@@ -512,7 +512,10 @@ int main() {
 	//light space matrix setup
 	glm::vec3 lightPos = glm::vec3(-0.6, 3, -4.2);//.-0.6, 3, -4.2
 	glm::vec3 lightTarget = glm::vec3(-0.6, -0.8, -4.2);
-	glm::mat4 lightProjection = glm::ortho(-10.0, 10.0, -10.0, 10.0, 0.5, 4.5);
+	// Ortho tightened to fit the actual shadow-casting region (alley + pins + ball)
+	// instead of a 20x20 area where ~90% of texels are wasted on empty space.
+	// Light's "up" is world Z, so the ortho's vertical axis is world Z.
+	glm::mat4 lightProjection = glm::ortho(-2.5, 2.5, -6.0, 6.0, 0.5, 4.5);
 	glm::mat4 lightView = glm::lookAt(lightPos, lightTarget, glm::vec3(0,0,1));
 	glm::mat4 lightSpaceMatrix = lightProjection * lightView;
 
@@ -535,7 +538,8 @@ int main() {
 	//sets shadow map texture as the active one
 	glBindTexture(GL_TEXTURE_2D, shadowMap);
 
-	glTexImage2D(GL_TEXTURE_2D, 0, GL_DEPTH_COMPONENT, 1024, 1024, 0, GL_DEPTH_COMPONENT, GL_FLOAT, nullptr);
+	const int shadowMapSize = 2048;
+	glTexImage2D(GL_TEXTURE_2D, 0, GL_DEPTH_COMPONENT, shadowMapSize, shadowMapSize, 0, GL_DEPTH_COMPONENT, GL_FLOAT, nullptr);
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_BORDER);
@@ -581,7 +585,7 @@ int main() {
 	glm::vec3(-0.6, -0.8, -4.2), glm::vec3(0.0, -0.8, -4.2), glm::vec3(0.6, -0.8, -4.2),
 	glm::vec3(-0.9, -0.8, -5.0), glm::vec3(-0.3, -0.8, -5.0), glm::vec3(0.3, -0.8, -5.0), glm::vec3(0.9, -0.8, -5.0)};
 
-	playSound("C:/Users/ViniciusDugue/CECS 449/proj/sounds/doomost.wav");
+	playSound("C:/Users/vinic/CECS 449/proj/sounds/doomost.wav");
 
 	// Ready, set, go!
 	bool running = true;
@@ -603,7 +607,7 @@ int main() {
 
 			if (ev.type == sf::Event::KeyPressed) {
 				if (ev.key.code == sf::Keyboard::W) {
-					playSound("C:/Users/ViniciusDugue/CECS 449/proj/sounds/discord.mp3");
+					playSound("C:/Users/vinic/CECS 449/proj/sounds/discord.mp3");
 				}
 			}
 
@@ -667,17 +671,17 @@ int main() {
 				// play some sounds before animations finish woth threads
 				std::thread([moveDevilDuration]() {
 					sf::sleep(sf::seconds(moveDevilDuration-2));
-					playSound("C:/Users/ViniciusDugue/CECS 449/proj/sounds/bowserlaugh.wav");
+					playSound("C:/Users/vinic/CECS 449/proj/sounds/bowserlaugh.wav");
 					}).detach();
 
 				std::thread([moveDevilDuration]() {
 					sf::sleep(sf::seconds(moveDevilDuration ));
-					playSound("C:/Users/ViniciusDugue/CECS 449/proj/sounds/wiistrike.wav");
+					playSound("C:/Users/vinic/CECS 449/proj/sounds/wiistrike.wav");
 					}).detach();
 
 				std::thread([moveDevilDuration]() {
 					sf::sleep(sf::seconds(moveDevilDuration +1.5));
-					playSound("C:/Users/ViniciusDugue/CECS 449/proj/sounds/hellstrike.wav");
+					playSound("C:/Users/vinic/CECS 449/proj/sounds/hellstrike.wav");
 					}).detach();
 
 				// calling animators for this if block
@@ -753,6 +757,7 @@ int main() {
 		myScene.program.setUniform("view", camera);
 		myScene.program.setUniform("projection", perspective);
 		myScene.program.setUniform("cameraPos", cameraPos);
+		myScene.program.setUniform("viewPos", cameraPos);
 
 		// Update the scene.
 		for (auto& anim : myScene.animators) {
@@ -760,7 +765,7 @@ int main() {
 		}
 
 		// change vertiport to shadowmap res and swap frame to shadow frame buffer
-		glViewport(0, 0, 1024, 1024);
+		glViewport(0, 0, shadowMapSize, shadowMapSize);
 		glBindFramebuffer(GL_FRAMEBUFFER, shadowFBO);
 		glClear(GL_DEPTH_BUFFER_BIT);
 
@@ -780,10 +785,13 @@ int main() {
 
 		myScene.program.activate();
 
-		//put shadow map in texture 0
-		myScene.program.setUniform("shadowMap", 0);
-		glActiveTexture(GL_TEXTURE0);
+		// Bind the shadow map to a high texture unit so per-mesh textures
+		// (which start at GL_TEXTURE0) cannot clobber it during object rendering.
+		const int shadowMapUnit = 8;
+		myScene.program.setUniform("shadowMap", shadowMapUnit);
+		glActiveTexture(GL_TEXTURE0 + shadowMapUnit);
 		glBindTexture(GL_TEXTURE_2D, shadowMap);
+		glActiveTexture(GL_TEXTURE0);
 
 		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 

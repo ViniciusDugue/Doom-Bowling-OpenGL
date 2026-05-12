@@ -438,5 +438,8 @@ out/
 .idea/httpRequests
 
 
+# Claude Code local state
+.claude/
+
 # Don't ignore model files.
 !models/*

@@ -33,24 +33,34 @@ uniform vec3 directionalColor;
 // Location of the camera.
 uniform vec3 viewPos;
 
-float ShadowCalculation(vec4 fragLightSpacePos)
+float ShadowCalculation(vec4 fragLightSpacePos, vec3 normal, vec3 lightDir)
 {
     // clip space to NDC
     vec3 projCoords = fragLightSpacePos.xyz / fragLightSpacePos.w;
-    
+
     // normalize to [0,1]
     projCoords = (projCoords * 0.5) + 0.5;
 
-    float closestDepth = texture(shadowMap, projCoords.xy).r;// closest frags depth
-    float currentDepth = projCoords.z; // current frags depth 
-    
-    // comparing shadowmap depth with current light depth
+    // Anything past the light's far plane is unshadowed (outside frustum).
+    if (projCoords.z > 1.0)
+        return 0.0;
+
+    float currentDepth = projCoords.z;
+
+    // Slope-scaled bias removes shadow acne on surfaces near-parallel to the light.
+    float bias = max(0.005 * (1.0 - dot(normalize(normal), normalize(lightDir))), 0.0005);
+
+    // 3x3 PCF: average 9 neighboring texels to soften the stepped texel-aliasing
+    // artifacts that show up on curved receivers like the bowling ball.
+    vec2 texelSize = 1.0 / vec2(textureSize(shadowMap, 0));
     float shadow = 0.0;
-    if (currentDepth > closestDepth)
-    {
-        shadow = 1.0;
+    for (int x = -1; x <= 1; ++x) {
+        for (int y = -1; y <= 1; ++y) {
+            float pcfDepth = texture(shadowMap, projCoords.xy + vec2(x, y) * texelSize).r;
+            shadow += currentDepth - bias > pcfDepth ? 1.0 : 0.0;
+        }
     }
-    return shadow;
+    return shadow / 9.0;
 }
 
 
@@ -80,7 +90,7 @@ void main() {
     float spec = pow(max(dot(V, R), 0.0), material.w); 
     vec3 specularIntensity = material.z * directionalColor * spec;
 
-    float shadow = ShadowCalculation(FragLightSpacePos);
+    float shadow = ShadowCalculation(FragLightSpacePos, N, L);
     
     vec3 lightIntensity = ambientIntensity + ((1.0 - shadow) * (diffuseIntensity + specularIntensity));
     FragColor = vec4(lightIntensity, 1) * texture(baseTexture, TexCoord);
